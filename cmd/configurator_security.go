@@ -110,8 +110,7 @@ func (c *Configurator) buildSecurityCacheSection(settings *linkquisition.Setting
 	clearCacheButton := widget.NewButton(i18n.T("config.security_cache_clear"), func() {})
 	clearCacheButton.Importance = widget.LowImportance
 	clearCacheButton.OnTapped = func() {
-		configDir := c.settingsService.GetConfigFolderPath()
-		if err := safety.ClearAll(configDir); err != nil {
+		if err := safety.ClearAll(c.settingsService.GetPaths().Cache); err != nil {
 			c.logger.Error("Error clearing security cache", "error", err)
 			clearCacheButton.SetText(i18n.T("config.security_cache_clear_error"))
 		} else {

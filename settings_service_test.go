@@ -14,7 +14,7 @@ import (
 
 // testPaths puts all of the service's folders in dir.
 func testPaths(dir string) Paths {
-	return Paths{Config: dir, Log: dir, Plugins: dir}
+	return Paths{Config: dir, Log: dir, Cache: dir, Plugins: dir}
 }
 
 type mockBrowserService struct {
@@ -307,6 +307,7 @@ func TestFileSettingsService_PathGettersUsePaths(t *testing.T) {
 	paths := Paths{
 		Config:  filepath.Join("cfg", "linkquisition"),
 		Log:     filepath.Join("state", "linkquisition"),
+		Cache:   filepath.Join("cache", "linkquisition"),
 		Plugins: filepath.Join("lib", "plugins"),
 	}
 	svc := &FileSettingsService{Paths: paths}

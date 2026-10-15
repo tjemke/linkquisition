@@ -11,11 +11,13 @@ import (
 
 // NewPaths resolves the folders linkquisition uses on Windows.
 // Config lives in %APPDATA%\linkquisition, logs in %LOCALAPPDATA%\linkquisition\logs,
-// and plugins are not supported on Windows (Plugins is empty).
+// caches in %LOCALAPPDATA%\linkquisition\cache, and plugins are not supported on
+// Windows (Plugins is empty).
 func NewPaths() linkquisition.Paths {
 	return linkquisition.Paths{
 		Config: configFolderPath(),
-		Log:    logFolderPath(),
+		Log:    localFolderPath("logs"),
+		Cache:  localFolderPath("cache"),
 	}
 }
 
@@ -28,11 +30,12 @@ func configFolderPath() string {
 	return filepath.Join(configDir, "linkquisition")
 }
 
-func logFolderPath() string {
-	cacheDir, err := os.UserCacheDir()
+// localFolderPath returns the named folder in %LOCALAPPDATA%\linkquisition.
+func localFolderPath(name string) string {
+	localAppData, err := os.UserCacheDir()
 	if err != nil {
 		homeDir, _ := os.UserHomeDir()
-		return filepath.Join(homeDir, "AppData", "Local", "linkquisition", "logs")
+		return filepath.Join(homeDir, "AppData", "Local", "linkquisition", name)
 	}
-	return filepath.Join(cacheDir, "linkquisition", "logs")
+	return filepath.Join(localAppData, "linkquisition", name)
 }

@@ -462,7 +462,7 @@ func (c *Configurator) buildFaviconSection(settings *linkquisition.Settings) fyn
 	clearCacheButton := widget.NewButton(i18n.T("config.favicon_clear_cache"), func() {})
 	clearCacheButton.Importance = widget.LowImportance
 	clearCacheButton.OnTapped = func() {
-		cacheDir := filepath.Join(c.settingsService.GetConfigFolderPath(), "favicons")
+		cacheDir := filepath.Join(c.settingsService.GetPaths().Cache, "favicons")
 		if err := os.RemoveAll(cacheDir); err != nil {
 			c.logger.Error("Error clearing favicon cache", "error", err)
 			clearCacheButton.SetText(i18n.T("config.favicon_clear_cache_error"))

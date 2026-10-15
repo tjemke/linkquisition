@@ -16,12 +16,14 @@ func TestNewPaths_UsesBaseDirs(t *testing.T) {
 	dirs := &BaseDirs{
 		ConfigHome: filepath.Join(dir, "config"),
 		StateHome:  filepath.Join(dir, "state"),
+		CacheHome:  filepath.Join(dir, "cache"),
 	}
 
 	paths := NewPaths(dirs)
 
 	assert.Equal(t, filepath.Join(dir, "config", "linkquisition"), paths.Config)
 	assert.Equal(t, filepath.Join(dir, "state", "linkquisition"), paths.Log)
+	assert.Equal(t, filepath.Join(dir, "cache", "linkquisition"), paths.Cache)
 }
 
 // An empty XDG_STATE_HOME used to put the log folder at "linkquisition",

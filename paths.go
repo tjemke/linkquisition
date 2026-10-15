@@ -10,6 +10,10 @@ type Paths struct {
 	// Log is the folder holding linkquisition.log.
 	Log string
 
+	// Cache is the folder for data that can be fetched or computed again, such
+	// as favicons and URL safety check results. Deleting it loses nothing.
+	Cache string
+
 	// Plugins is the folder relative plugin paths are resolved against.
 	// It is empty on platforms without plugin support.
 	Plugins string

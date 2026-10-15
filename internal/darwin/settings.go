@@ -14,6 +14,7 @@ func NewPaths() linkquisition.Paths {
 	return linkquisition.Paths{
 		Config:  configFolderPath(),
 		Log:     logFolderPath(),
+		Cache:   cacheFolderPath(),
 		Plugins: pluginFolderPath(),
 	}
 }
@@ -33,6 +34,14 @@ func logFolderPath() string {
 		return filepath.Join(os.TempDir(), "linkquisition")
 	}
 	return filepath.Join(homeDir, "Library", "Logs", "linkquisition")
+}
+
+func cacheFolderPath() string {
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return filepath.Join(os.TempDir(), "linkquisition")
+	}
+	return filepath.Join(cacheDir, "linkquisition")
 }
 
 func pluginFolderPath() string {

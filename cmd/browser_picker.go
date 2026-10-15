@@ -91,7 +91,7 @@ func (picker *BrowserPicker) Run(_ context.Context, urlToOpen string) error {
 	// Prune expired security cache entries in the background
 	if settings.Security.Cache.Enabled && settings.Security.IsConfigured() {
 		go safety.NewCache(
-			picker.settingsService.GetConfigFolderPath(),
+			picker.settingsService.GetPaths().Cache,
 			settings.Security.GetProvider(),
 			settings.Security.Cache.GetTTL(),
 		).PruneExpired()
@@ -302,7 +302,7 @@ func (picker *BrowserPicker) buildSafetyIndicator(
 		var cache *safety.Cache
 		if settings.Security.Cache.Enabled {
 			cache = safety.NewCache(
-				picker.settingsService.GetConfigFolderPath(),
+				picker.settingsService.GetPaths().Cache,
 				provider,
 				settings.Security.Cache.GetTTL(),
 			)
@@ -662,7 +662,7 @@ func (picker *BrowserPicker) fetchAndUpdateFavicon(
 	urlToOpen string, img *canvas.Image, settings *linkquisition.Settings,
 ) {
 	strategy := settings.Ui.GetFaviconStrategy()
-	cacheDir := filepath.Join(picker.settingsService.GetConfigFolderPath(), "favicons")
+	cacheDir := filepath.Join(picker.settingsService.GetPaths().Cache, "favicons")
 
 	fetcher := favicon.NewFetcher(strategy, cacheDir)
 

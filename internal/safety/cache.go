@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	cacheDirPerms    = 0o755
+	cacheDirPerms    = 0o700
 	cacheFilePerms   = 0o600
 	securityCacheDir = "security_cache"
 )
@@ -28,10 +28,10 @@ type cachedEntry struct {
 }
 
 // NewCache creates a new security result cache for the given provider.
-// The cache directory is: <configDir>/security_cache/<provider>/
-func NewCache(configDir, provider string, ttl time.Duration) *Cache {
+// The cache directory is: <cacheDir>/security_cache/<provider>/
+func NewCache(cacheDir, provider string, ttl time.Duration) *Cache {
 	return &Cache{
-		dir: filepath.Join(configDir, securityCacheDir, provider),
+		dir: filepath.Join(cacheDir, securityCacheDir, provider),
 		ttl: ttl,
 	}
 }
@@ -121,8 +121,8 @@ func (c *Cache) PruneExpired() {
 }
 
 // ClearAll removes the entire security cache directory (all providers).
-func ClearAll(configDir string) error {
-	return os.RemoveAll(filepath.Join(configDir, securityCacheDir))
+func ClearAll(cacheDir string) error {
+	return os.RemoveAll(filepath.Join(cacheDir, securityCacheDir))
 }
 
 // cacheKey returns a filesystem-safe key for a URL.

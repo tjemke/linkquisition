@@ -16,6 +16,7 @@ func newTestSettingsService(t *testing.T) *linkquisition.FileSettingsService {
 		Paths: linkquisition.Paths{
 			Config:  dir,
 			Log:     dir,
+			Cache:   dir,
 			Plugins: dir,
 		},
 	}

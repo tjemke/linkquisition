@@ -239,6 +239,10 @@ shown below.
 	The log file is _$XDG_STATE_HOME/linkquisition/linkquisition.log_.
 	Default: _~/.local/state_.
 
+*XDG_CACHE_HOME*
+	Favicons and URL safety check results are cached in
+	_$XDG_CACHE_HOME/linkquisition/_. Default: _~/.cache_.
+
 *XDG_DATA_HOME*, *XDG_DATA_DIRS*
 	Browsers are discovered from the desktop entries in the _applications_
 	folder of each data directory, _$XDG_DATA_HOME_ first. Their icons are

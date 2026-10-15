@@ -35,3 +35,10 @@ func TestNewPaths_Plugins(t *testing.T) {
 
 	assert.Empty(t, path, "plugins are not supported on Windows")
 }
+
+func TestNewPaths_Cache(t *testing.T) {
+	path := NewPaths().Cache
+
+	assert.NotEmpty(t, path)
+	assert.True(t, strings.HasSuffix(path, filepath.Join("linkquisition", "cache")))
+}

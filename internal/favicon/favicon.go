@@ -31,8 +31,8 @@ const (
 
 	fetchTimeout    = 5 * time.Second
 	maxFaviconBytes = 256 * 1024 // 256 KB max favicon size
-	cacheDirPerms   = 0755
-	cacheFilePerms  = 0644
+	cacheDirPerms   = 0700
+	cacheFilePerms  = 0600
 	cacheTTL        = 7 * 24 * time.Hour // 1 week
 
 	googleFaviconURL = "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=%s&size=32"

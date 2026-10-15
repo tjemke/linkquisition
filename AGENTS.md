@@ -265,12 +265,13 @@ Useful flags for debugging:
 
 ## Paths on each platform
 
-| What                  | Linux                                 | macOS                                                 | Windows                              |
-|-----------------------|---------------------------------------|-------------------------------------------------------|--------------------------------------|
-| Config                | `$XDG_CONFIG_HOME/linkquisition/`     | `~/Library/Application Support/linkquisition/`        | `%APPDATA%\linkquisition\`           |
-| Logs                  | `$XDG_STATE_HOME/linkquisition/`      | `~/Library/Logs/linkquisition/`                       | `%LOCALAPPDATA%\linkquisition\logs\` |
-| Plugins (system)      | `<prefix>/lib/linkquisition/plugins/` | `Linkquisition.app/Contents/Resources/plugins/`       | N/A (plugins not supported)          |
-| Plugin cache (defang) | `~/.config/linkquisition/defang/`     | `~/Library/Application Support/linkquisition/defang/` | N/A (plugins not supported)          |
+| What                  | Linux                                 | macOS                                                 | Windows                               |
+|-----------------------|---------------------------------------|-------------------------------------------------------|---------------------------------------|
+| Config                | `$XDG_CONFIG_HOME/linkquisition/`     | `~/Library/Application Support/linkquisition/`        | `%APPDATA%\linkquisition\`            |
+| Logs                  | `$XDG_STATE_HOME/linkquisition/`      | `~/Library/Logs/linkquisition/`                       | `%LOCALAPPDATA%\linkquisition\logs\`  |
+| Cache                 | `$XDG_CACHE_HOME/linkquisition/`      | `~/Library/Caches/linkquisition/`                     | `%LOCALAPPDATA%\linkquisition\cache\` |
+| Plugins (system)      | `<prefix>/lib/linkquisition/plugins/` | `Linkquisition.app/Contents/Resources/plugins/`       | N/A (plugins not supported)           |
+| Plugin cache (defang) | `~/.config/linkquisition/defang/`     | `~/Library/Application Support/linkquisition/defang/` | N/A (plugins not supported)           |
 
 On Linux, `<prefix>` is where the (symlink-resolved) executable is installed:
 `<prefix>/bin/linkquisition`, e.g. `/usr`, a Nix store path, Flatpak's `/app` or the

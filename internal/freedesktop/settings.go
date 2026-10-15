@@ -18,14 +18,16 @@ const (
 )
 
 // NewPaths resolves the folders linkquisition uses on Linux from the XDG base
-// directories: config in $XDG_CONFIG_HOME and logs in $XDG_STATE_HOME. Plugins
-// are installed alongside the executable, see pluginFolderPath.
+// directories: config in $XDG_CONFIG_HOME, logs in $XDG_STATE_HOME and caches
+// in $XDG_CACHE_HOME. Plugins are installed alongside the executable, see
+// pluginFolderPath.
 func NewPaths(dirs *BaseDirs) linkquisition.Paths {
 	executable, _ := os.Executable()
 
 	return linkquisition.Paths{
 		Config:  filepath.Join(dirs.ConfigHome, appDirName),
 		Log:     filepath.Join(dirs.StateHome, appDirName),
+		Cache:   filepath.Join(dirs.CacheHome, appDirName),
 		Plugins: pluginFolderPath(executable),
 	}
 }
