@@ -237,8 +237,12 @@ shown below.
 
 *XDG_DATA_HOME*, *XDG_DATA_DIRS*
 	Browsers are discovered from the desktop entries in the _applications_
-	folder of each data directory, _$XDG_DATA_HOME_ first. Defaults:
-	_~/.local/share_ and _/usr/local/share:/usr/share_.
+	folder of each data directory, _$XDG_DATA_HOME_ first. Their icons are
+	looked up as the Icon Theme Specification describes: in the _hicolor_ theme
+	under _~/.icons_ and the _icons_ folder of each data directory, then as
+	unthemed icons in those folders, the _pixmaps_ folder of each data
+	directory and _/usr/share/pixmaps_, and finally in any other installed
+	theme. Defaults: _~/.local/share_ and _/usr/local/share:/usr/share_.
 
 # SEE ALSO
 

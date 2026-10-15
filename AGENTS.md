@@ -280,6 +280,11 @@ empty or relative values). The defaults are `~/.config`, `~/.local/state`, `~/.c
 installs the data dirs are elsewhere. In tests, build a `BaseDirs` literal pointing at
 `t.TempDir()` rather than setting environment variables.
 
+Desktop entries come from `XdgService.GetDesktopEntryPaths()` and icons from
+`BaseDirs.FindIcon()`, which follow the Desktop Entry and Icon Theme specs. Don't
+`filepath.WalkDir` these trees: NixOS profiles are symlink farms into `/nix/store`, and
+`WalkDir` does not descend into symlinked directories.
+
 ## Localization
 
 - Translation files live in `internal/i18n/translations/` (JSON, keyed by locale code)

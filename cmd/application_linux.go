@@ -19,6 +19,7 @@ func newPlatformServices() (linkquisition.BrowserService, linkquisition.Settings
 		BrowserIconLoader: &freedesktop.DefaultBrowserIconLoader{
 			XdgService:          xdgService,
 			DesktopEntryService: &freedesktop.DesktopEntryService{},
+			BaseDirs:            baseDirs,
 		},
 	}
 

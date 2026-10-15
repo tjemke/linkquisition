@@ -5,7 +5,6 @@ package freedesktop
 import (
 	"os"
 	"path/filepath"
-	"strings"
 
 	"fyne.io/fyne/v2"
 
@@ -18,7 +17,7 @@ type BrowserIconLoader interface {
 	LoadIcon(browser linkquisition.Browser) ([]byte, error)
 	// ResolveIconName resolves an icon name (from a .desktop file's Icon= field) to an
 	// absolute file path. If the name is already an absolute path and the file exists,
-	// it is returned as-is. Otherwise, it searches standard icon directories.
+	// it is returned as-is. Otherwise, it is looked up in the installed icon themes.
 	// Returns an empty string if the icon cannot be found.
 	ResolveIconName(iconName string) string
 }
@@ -27,6 +26,7 @@ type BrowserIconLoader interface {
 type DefaultBrowserIconLoader struct {
 	XdgService          *XdgService
 	DesktopEntryService *DesktopEntryService
+	BaseDirs            *BaseDirs
 }
 
 func (l *DefaultBrowserIconLoader) LoadIcon(browser linkquisition.Browser) ([]byte, error) {
@@ -67,8 +67,8 @@ func (l *DefaultBrowserIconLoader) resolveIconPathForCommand(command string) str
 
 // ResolveIconName resolves an icon name (from a .desktop file's Icon= field) to an
 // absolute file path. If the name is already an absolute path and the file exists,
-// it is returned as-is. Otherwise, it searches standard icon directories.
-// Returns an empty string if the icon cannot be found.
+// it is returned as-is. Otherwise, it is looked up as the Icon Theme spec
+// describes, see BaseDirs.FindIcon. Returns an empty string if the icon cannot be found.
 func (l *DefaultBrowserIconLoader) ResolveIconName(iconName string) string {
 	if iconName == "" {
 		return ""
@@ -82,68 +82,5 @@ func (l *DefaultBrowserIconLoader) ResolveIconName(iconName string) string {
 		return ""
 	}
 
-	// Search for the icon by name in standard icon directories
-	return findIconByName(iconName)
-}
-
-// findIconByName searches for an icon file matching the given name (without extension)
-// in standard icon directories, including user-local paths.
-func findIconByName(iconName string) string {
-	iconDirs := getIconSearchDirs()
-
-	for _, dir := range iconDirs {
-		if path := searchDirForIcon(dir, iconName); path != "" {
-			return path
-		}
-	}
-
-	return ""
-}
-
-// getIconSearchDirs returns the list of directories to search for icons,
-// including user-local directories.
-func getIconSearchDirs() []string {
-	var dirs []string
-
-	// User-local icons ($XDG_DATA_HOME/icons/)
-	dataHome, isset := os.LookupEnv("XDG_DATA_HOME")
-	if !isset {
-		if home, err := os.UserHomeDir(); err == nil {
-			dataHome = filepath.Join(home, ".local", "share")
-		}
-	}
-	if dataHome != "" {
-		dirs = append(dirs, filepath.Join(dataHome, "icons"))
-	}
-
-	// System icon directories
-	dirs = append(dirs, "/usr/share/icons", "/usr/share/pixmaps")
-
-	return dirs
-}
-
-// searchDirForIcon walks a directory tree looking for an icon file matching the given name.
-func searchDirForIcon(dir, iconName string) string {
-	var foundPath string
-
-	_ = filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return filepath.SkipDir
-		}
-		if d.IsDir() {
-			return nil
-		}
-
-		baseName := d.Name()
-		ext := filepath.Ext(baseName)
-		nameWithoutExt := strings.TrimSuffix(baseName, ext)
-
-		if nameWithoutExt == iconName {
-			foundPath = path
-			return filepath.SkipAll
-		}
-		return nil
-	})
-
-	return foundPath
+	return l.BaseDirs.FindIcon(iconName, iconLookupSize)
 }
