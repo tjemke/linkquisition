@@ -25,6 +25,7 @@ type DesktopEntry struct {
 	StartupNotify  bool
 	Actions        string
 	Name           string
+	Hidden         bool
 }
 
 type DesktopEntryService struct {
@@ -54,6 +55,7 @@ func (d *DesktopEntryService) CreateFromPath(path string) (*DesktopEntry, error)
 		StartupNotify:  section.Key("StartupNotify").MustBool(),
 		Actions:        section.Key("Actions").String(),
 		Name:           section.Key("Name").String(),
+		Hidden:         section.Key("Hidden").MustBool(),
 	}
 
 	return desktopEntry, nil

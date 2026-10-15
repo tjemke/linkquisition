@@ -34,31 +34,54 @@ func (x *XdgService) GetDesktopEntryPathForFilename(name string) (string, error)
 }
 
 func (x *XdgService) GetDesktopEntryPathForBinary(command string) (string, error) {
-	paths := x.GetApplicationPaths()
-
-	if len(paths) == 0 {
-		return "", fmt.Errorf("no valid desktop entry paths found in $XDG_DATA_DIRS")
+	paths, err := x.GetDesktopEntryPaths()
+	if err != nil {
+		return "", err
 	}
 
-	for _, dir := range paths {
+	for _, path := range paths {
+		if desktopEntryExecMatches(path, command) {
+			return path, nil
+		}
+	}
+
+	return "", fmt.Errorf("no .desktop entry found for %s", command)
+}
+
+// GetDesktopEntryPaths returns the paths of the installed desktop entries, from
+// the most important application folder to the least. A desktop file ID (the
+// file name) in a more important folder overrides the same ID further down, so
+// every ID is returned once: the user's copy of an entry replaces the system
+// one, and a browser installed in several NixOS profiles is listed once. See
+// https://specifications.freedesktop.org/desktop-entry-spec/latest/file-naming.html
+func (x *XdgService) GetDesktopEntryPaths() ([]string, error) {
+	dirs := x.GetApplicationPaths()
+
+	if len(dirs) == 0 {
+		return nil, fmt.Errorf("no valid desktop entry paths found in $XDG_DATA_DIRS")
+	}
+
+	var paths []string
+	seen := make(map[string]bool)
+
+	for _, dir := range dirs {
 		entries, err := os.ReadDir(dir)
 		if err != nil {
 			continue
 		}
 
 		for _, entry := range entries {
-			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".desktop") {
+			id := entry.Name()
+			if entry.IsDir() || !strings.HasSuffix(id, ".desktop") || seen[id] {
 				continue
 			}
 
-			entryPath := filepath.Join(dir, entry.Name())
-			if desktopEntryExecMatches(entryPath, command) {
-				return entryPath, nil
-			}
+			seen[id] = true
+			paths = append(paths, filepath.Join(dir, id))
 		}
 	}
 
-	return "", fmt.Errorf("no .desktop entry found for %s", command)
+	return paths, nil
 }
 
 // GetApplicationPaths returns the existing "applications" folders under the XDG

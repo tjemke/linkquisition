@@ -3,6 +3,7 @@
 package freedesktop
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -426,4 +427,74 @@ func TestGetApplicationPaths_IncludesUserLocal(t *testing.T) {
 	if len(paths) >= 2 {
 		assert.Equal(t, localAppsDir, paths[0])
 	}
+}
+
+// writeDesktopEntry writes a .desktop file named id into dir/applications.
+func writeDesktopEntry(t *testing.T, dir, id, content string) string {
+	t.Helper()
+	appsDir := filepath.Join(dir, "applications")
+	require.NoError(t, os.MkdirAll(appsDir, 0755))
+	path := filepath.Join(appsDir, id)
+	require.NoError(t, os.WriteFile(path, []byte(content), 0600))
+	return path
+}
+
+func TestGetDesktopEntryPaths_FirstDesktopFileIDWins(t *testing.T) {
+	dir := t.TempDir()
+	user := filepath.Join(dir, "user")
+	system := filepath.Join(dir, "system")
+	userFirefox := writeDesktopEntry(t, user, "firefox.desktop", "[Desktop Entry]\nName=Firefox (user)\n")
+	writeDesktopEntry(t, system, "firefox.desktop", "[Desktop Entry]\nName=Firefox\n")
+	systemChromium := writeDesktopEntry(t, system, "chromium.desktop", "[Desktop Entry]\nName=Chromium\n")
+	writeDesktopEntry(t, system, "README", "not a desktop entry")
+
+	paths, err := newTestXdgService(user, system).GetDesktopEntryPaths()
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{userFirefox, systemChromium}, paths)
+}
+
+func TestGetAvailableBrowsers_ListsBrowserInSeveralProfilesOnce(t *testing.T) {
+	dir := t.TempDir()
+	userProfile := filepath.Join(dir, "etc", "profiles", "per-user", "alice", "share")
+	systemProfile := filepath.Join(dir, "run", "current-system", "sw", "share")
+	entry := "[Desktop Entry]\nName=%s\nExec=%s %%U\nCategories=Network;WebBrowser;\n"
+	writeDesktopEntry(t, userProfile, "chromium-browser.desktop", fmt.Sprintf(entry, "Chromium", "/nix/store/new-chromium/bin/chromium"))
+	writeDesktopEntry(t, systemProfile, "chromium-browser.desktop", fmt.Sprintf(entry, "Chromium", "/nix/store/old-chromium/bin/chromium"))
+
+	svc := &BrowserService{
+		XdgService:          newTestXdgService(filepath.Join(dir, "local"), userProfile, systemProfile),
+		DesktopEntryService: &DesktopEntryService{},
+		BrowserIconLoader:   &mockBrowserIconLoader{},
+	}
+
+	browsers, err := svc.GetAvailableBrowsers()
+
+	require.NoError(t, err)
+	require.Len(t, browsers, 1)
+	assert.Equal(t, "/nix/store/new-chromium/bin/chromium %U", browsers[0].Command)
+}
+
+func TestGetAvailableBrowsers_SkipsHiddenEntries(t *testing.T) {
+	dir := t.TempDir()
+	dataHome := filepath.Join(dir, "local")
+	system := filepath.Join(dir, "share")
+	browser := "[Desktop Entry]\nName=%s\nExec=%s %%u\nCategories=Network;WebBrowser;\n"
+	writeDesktopEntry(t, system, "firefox.desktop", fmt.Sprintf(browser, "Firefox", "firefox"))
+	writeDesktopEntry(t, system, "epiphany.desktop", fmt.Sprintf(browser, "Web", "epiphany"))
+	writeDesktopEntry(t, system, "chromium.desktop", fmt.Sprintf(browser, "Chromium", "chromium")+"Hidden=true\n")
+	// A user-level copy with Hidden=true deletes the system-wide entry with the same ID.
+	writeDesktopEntry(t, dataHome, "epiphany.desktop", fmt.Sprintf(browser, "Web", "epiphany")+"Hidden=true\n")
+
+	svc := &BrowserService{
+		XdgService:          newTestXdgService(dataHome, system),
+		DesktopEntryService: &DesktopEntryService{},
+		BrowserIconLoader:   &mockBrowserIconLoader{},
+	}
+
+	browsers, err := svc.GetAvailableBrowsers()
+
+	require.NoError(t, err)
+	require.Len(t, browsers, 1)
+	assert.Equal(t, "Firefox", browsers[0].Name)
 }

@@ -25,48 +25,40 @@ type BrowserService struct {
 }
 
 func (b *BrowserService) GetAvailableBrowsers() ([]linkquisition.Browser, error) {
-	paths := b.XdgService.GetApplicationPaths()
-
-	if len(paths) == 0 {
-		return nil, fmt.Errorf("no valid desktop entry paths found in $XDG_DATA_DIRS")
+	paths, err := b.XdgService.GetDesktopEntryPaths()
+	if err != nil {
+		return nil, err
 	}
 
 	var browsers []linkquisition.Browser
 
-	for _, dir := range paths {
-		entries, err := os.ReadDir(dir)
-		if err != nil {
+	for _, path := range paths {
+		if !desktopEntryHasCategory(path, "WebBrowser") {
 			continue
 		}
 
-		for _, entry := range entries {
-			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".desktop") {
-				continue
-			}
-
-			path := filepath.Join(dir, entry.Name())
-
-			if !desktopEntryHasCategory(path, "WebBrowser") {
-				continue
-			}
-
-			// skip Linkquisition as an available browser
-			if strings.Contains(entry.Name(), "linkquisition") {
-				continue
-			}
-
-			desktopEntry, err := b.DesktopEntryService.CreateFromPath(path)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse desktop entry %q: %v", path, err)
-			}
-
-			browser := linkquisition.Browser{
-				Name:     desktopEntry.Name,
-				Command:  desktopEntry.Exec,
-				IconPath: b.BrowserIconLoader.ResolveIconName(desktopEntry.Icon),
-			}
-			browsers = append(browsers, browser)
+		// skip Linkquisition as an available browser
+		if strings.Contains(filepath.Base(path), "linkquisition") {
+			continue
 		}
+
+		desktopEntry, err := b.DesktopEntryService.CreateFromPath(path)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse desktop entry %q: %v", path, err)
+		}
+
+		// Hidden=true means the entry has been deleted, e.g. by the user
+		// overriding a system-wide entry.
+		if desktopEntry.Hidden {
+			continue
+		}
+
+		browser := linkquisition.Browser{
+			Name:     desktopEntry.Name,
+			Command:  desktopEntry.Exec,
+			IconPath: b.BrowserIconLoader.ResolveIconName(desktopEntry.Icon),
+		}
+		browsers = append(browsers, browser)
 	}
 
 	return browsers, nil
