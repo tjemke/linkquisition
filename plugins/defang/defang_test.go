@@ -91,10 +91,10 @@ func TestDefang_Setup_InvalidAction(t *testing.T) {
 
 func TestDefang_ProcessURL_WithCachedBlocklist(t *testing.T) {
 	logger := newTestLogger()
-	tmpDir := t.TempDir()
+	paths := linkquisition.Paths{Config: t.TempDir(), Cache: t.TempDir()}
 
-	// Create a cached blocklist
-	cacheDir := filepath.Join(tmpDir, "defang")
+	// Create a cached blocklist in the cache folder
+	cacheDir := filepath.Join(paths.Cache, "defang")
 	require.NoError(t, os.MkdirAll(cacheDir, 0700))
 
 	hostsContent := `# Comment line
@@ -105,7 +105,7 @@ func TestDefang_ProcessURL_WithCachedBlocklist(t *testing.T) {
 `
 	require.NoError(t, os.WriteFile(filepath.Join(cacheDir, "source_0.txt"), []byte(hostsContent), 0600))
 
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, paths)
 
 	for _, tt := range []struct {
 		name           string

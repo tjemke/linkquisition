@@ -163,9 +163,10 @@ By default, it uses two well-known, trusted sources:
 - [URLhaus](https://urlhaus.abuse.ch/) (abuse.ch) — malware distribution URLs
 - [Steven Black's hosts](https://github.com/StevenBlack/hosts) — aggregated malware/adware/phishing domains
 
-The blocklists are cached in the config directory (e.g. `~/.config/linkquisition/defang/` on Linux) and refreshed
-in the background when older than the configured update interval. The app never blocks on network I/O — it uses
-whatever is cached and updates lazily.
+The blocklists are cached in linkquisition's cache folder, `~/.cache/linkquisition/defang/` on Linux (or under
+`$XDG_CACHE_HOME` if that is set) and `~/Library/Caches/linkquisition/defang/` on macOS, and refreshed in the
+background when older than the configured update interval. The app never blocks on network I/O — it uses whatever is
+cached and updates lazily.
 
 ### Configuration
 

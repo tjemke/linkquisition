@@ -130,8 +130,8 @@ func (p *defang) Setup(serviceProvider linkquisition.PluginServiceProvider, conf
 		}
 	}
 
-	// Set up cache directory next to config
-	p.cacheDir = filepath.Join(serviceProvider.GetConfigFolderPath(), "defang")
+	// Downloaded blocklists can be fetched again, so they belong in the cache folder
+	p.cacheDir = filepath.Join(serviceProvider.GetPaths().Cache, "defang")
 
 	// Load cached blocklists from disk
 	p.loadCachedLists()
