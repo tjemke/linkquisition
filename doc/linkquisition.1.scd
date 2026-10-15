@@ -160,7 +160,11 @@ Plugins are shared-object files (_.so_) loaded at startup. They can modify URLs
 before they are opened. See the project documentation for details.
 
 Plugin locations:
-- Linux: _/usr/lib/linkquisition/plugins/_
+- Linux: _lib/linkquisition/plugins/_ in the prefix *linkquisition* is
+  installed in, e.g. _/usr/lib/linkquisition/plugins/_ for
+  _/usr/bin/linkquisition_. Symlinks to the executable are resolved, so
+  this works for Nix store paths, Flatpak (_/app_) and AppImage as well.
+  If there is no such folder, _/usr/lib/linkquisition/plugins/_ is used.
 - macOS: _Linkquisition.app/Contents/Resources/plugins/_
 
 *Note:* Plugins are not supported on Windows. Go's _plugin_ package does not

@@ -81,7 +81,8 @@ and *rule* subcommands).
 
 *path* (string)
 	Path to the plugin _.so_ file, absolute or relative to the plugin folder
-	(_/usr/lib/linkquisition/plugins/_).
+	(e.g. _/usr/lib/linkquisition/plugins/_, see *PLUGINS* in
+	*linkquisition*(1)).
 
 *isDisabled* (boolean)
 	If _true_, the plugin is not loaded.
