@@ -9,11 +9,16 @@ import (
 	"github.com/strobotti/linkquisition"
 )
 
-var _ linkquisition.PathProvider = (*PathProvider)(nil)
+// NewPaths resolves the folders linkquisition uses on Linux.
+func NewPaths() linkquisition.Paths {
+	return linkquisition.Paths{
+		Config:  configFolderPath(),
+		Log:     logFolderPath(),
+		Plugins: "/usr/lib/linkquisition/plugins",
+	}
+}
 
-type PathProvider struct{}
-
-func (p *PathProvider) GetConfigFolderPath() string {
+func configFolderPath() string {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return ".config"
@@ -22,7 +27,7 @@ func (p *PathProvider) GetConfigFolderPath() string {
 	return filepath.Join(configDir, "linkquisition")
 }
 
-func (p *PathProvider) GetLogFolderPath() string {
+func logFolderPath() string {
 	stateDir, isset := os.LookupEnv("XDG_STATE_HOME")
 	if isset {
 		return filepath.Join(stateDir, "linkquisition")
@@ -34,8 +39,4 @@ func (p *PathProvider) GetLogFolderPath() string {
 	}
 
 	return filepath.Join(os.TempDir(), "linkquisition")
-}
-
-func (p *PathProvider) GetPluginFolderPath() string {
-	return "/usr/lib/linkquisition/plugins"
 }

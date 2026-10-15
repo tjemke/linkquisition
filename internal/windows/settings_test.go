@@ -11,9 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPathProvider_GetConfigFolderPath(t *testing.T) {
-	p := &PathProvider{}
-	path := p.GetConfigFolderPath()
+func TestNewPaths_Config(t *testing.T) {
+	path := NewPaths().Config
 
 	assert.NotEmpty(t, path)
 	assert.True(t, strings.HasSuffix(path, filepath.Join("linkquisition")))
@@ -24,17 +23,15 @@ func TestPathProvider_GetConfigFolderPath(t *testing.T) {
 	}
 }
 
-func TestPathProvider_GetLogFolderPath(t *testing.T) {
-	p := &PathProvider{}
-	path := p.GetLogFolderPath()
+func TestNewPaths_Log(t *testing.T) {
+	path := NewPaths().Log
 
 	assert.NotEmpty(t, path)
 	assert.True(t, strings.HasSuffix(path, filepath.Join("linkquisition", "logs")))
 }
 
-func TestPathProvider_GetPluginFolderPath(t *testing.T) {
-	p := &PathProvider{}
-	path := p.GetPluginFolderPath()
+func TestNewPaths_Plugins(t *testing.T) {
+	path := NewPaths().Plugins
 
 	assert.Empty(t, path, "plugins are not supported on Windows")
 }

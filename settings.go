@@ -396,6 +396,9 @@ type SettingsService interface {
 
 	// GetConfigFolderPath returns the absolute path to the config-folder
 	GetConfigFolderPath() string
+
+	// GetPaths returns all the folders linkquisition keeps its files in
+	GetPaths() Paths
 }
 
 func GetDefaultSettings() *Settings {

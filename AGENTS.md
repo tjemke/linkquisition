@@ -174,8 +174,8 @@ it for the authoritative list of enabled linters and their settings. The linter 
 
 The `cmd/` directory is `package main` — it cannot be imported by other packages.
 Tests for code in `cmd/` must live in `cmd/*_test.go` files (same package). Use
-the `linkquisition.FileSettingsService` with a test `PathProvider` for integration-style
-tests (see `cmd/log_rotation_test.go` for an example).
+the `linkquisition.FileSettingsService` with test `linkquisition.Paths` pointing at
+`t.TempDir()` for integration-style tests (see `cmd/log_rotation_test.go` for an example).
 
 ### CLI architecture (cobra)
 
@@ -258,6 +258,9 @@ Useful flags for debugging:
 - `settings.go` — `Settings` struct, constants (`LogLevel*`, `BrowserMatchType*`, `Source*`),
   `SettingsService` interface, `MapSettingsLogLevelToSlog`
 - `settings_service.go` — `FileSettingsService` (shared, platform-independent implementation)
+- `paths.go` — `Paths` struct: every folder linkquisition keeps files in, resolved once at
+  startup by the platform's `NewPaths()` (`internal/freedesktop`, `internal/darwin`,
+  `internal/windows`). Add a field here instead of a new getter or function parameter
 - Use named constants for repeated string values (log levels, match types, sources)
 
 ## Paths on each platform

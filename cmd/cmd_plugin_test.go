@@ -227,10 +227,10 @@ func TestDiscoverAvailablePlugins_EmptyDir(t *testing.T) {
 func TestDiscoverAvailablePlugins_NonexistentDir(t *testing.T) {
 	// Use a path provider pointing to a dir that doesn't exist
 	svc := &linkquisition.FileSettingsService{
-		PathProvider: &testPathProvider{
-			configFolder: "/nonexistent/path",
-			logFolder:    "/nonexistent/path",
-			pluginFolder: "/nonexistent/path/plugins",
+		Paths: linkquisition.Paths{
+			Config:  "/nonexistent/path",
+			Log:     "/nonexistent/path",
+			Plugins: "/nonexistent/path/plugins",
 		},
 	}
 	settings := &linkquisition.Settings{}

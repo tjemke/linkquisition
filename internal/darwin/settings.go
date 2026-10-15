@@ -9,11 +9,16 @@ import (
 	"github.com/strobotti/linkquisition"
 )
 
-var _ linkquisition.PathProvider = (*PathProvider)(nil)
+// NewPaths resolves the folders linkquisition uses on macOS.
+func NewPaths() linkquisition.Paths {
+	return linkquisition.Paths{
+		Config:  configFolderPath(),
+		Log:     logFolderPath(),
+		Plugins: pluginFolderPath(),
+	}
+}
 
-type PathProvider struct{}
-
-func (p *PathProvider) GetConfigFolderPath() string {
+func configFolderPath() string {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		homeDir, _ := os.UserHomeDir()
@@ -22,7 +27,7 @@ func (p *PathProvider) GetConfigFolderPath() string {
 	return filepath.Join(configDir, "linkquisition")
 }
 
-func (p *PathProvider) GetLogFolderPath() string {
+func logFolderPath() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return filepath.Join(os.TempDir(), "linkquisition")
@@ -30,7 +35,7 @@ func (p *PathProvider) GetLogFolderPath() string {
 	return filepath.Join(homeDir, "Library", "Logs", "linkquisition")
 }
 
-func (p *PathProvider) GetPluginFolderPath() string {
+func pluginFolderPath() string {
 	execPath, err := os.Executable()
 	if err == nil {
 		bundlePath := filepath.Join(filepath.Dir(execPath), "..", "Resources", "plugins")

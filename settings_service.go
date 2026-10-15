@@ -11,39 +11,36 @@ import (
 const configDirPerms = 0700
 const configFilePerms = 0600
 
-// PathProvider supplies platform-specific paths used by the SettingsService.
-type PathProvider interface {
-	GetConfigFolderPath() string
-	GetLogFolderPath() string
-	GetPluginFolderPath() string
-}
-
 // FileSettingsService is the shared, platform-independent implementation of SettingsService.
 type FileSettingsService struct {
 	BrowserService BrowserService
-	PathProvider   PathProvider
+	Paths          Paths
 }
 
 var _ SettingsService = (*FileSettingsService)(nil)
 
+func (s *FileSettingsService) GetPaths() Paths {
+	return s.Paths
+}
+
 func (s *FileSettingsService) GetConfigFilePath() string {
-	return filepath.Join(s.PathProvider.GetConfigFolderPath(), "config.json")
+	return filepath.Join(s.Paths.Config, "config.json")
 }
 
 func (s *FileSettingsService) GetConfigFolderPath() string {
-	return s.PathProvider.GetConfigFolderPath()
+	return s.Paths.Config
 }
 
 func (s *FileSettingsService) GetLogFilePath() string {
-	return filepath.Join(s.PathProvider.GetLogFolderPath(), "linkquisition.log")
+	return filepath.Join(s.Paths.Log, "linkquisition.log")
 }
 
 func (s *FileSettingsService) GetLogFolderPath() string {
-	return s.PathProvider.GetLogFolderPath()
+	return s.Paths.Log
 }
 
 func (s *FileSettingsService) GetPluginFolderPath() string {
-	return s.PathProvider.GetPluginFolderPath()
+	return s.Paths.Plugins
 }
 
 func (s *FileSettingsService) ReadSettings() (*Settings, error) {
@@ -68,7 +65,7 @@ func (s *FileSettingsService) WriteSettings(settings *Settings) error {
 		return fmt.Errorf("unable to marshal settings: %v", err)
 	}
 
-	if errMkdir := os.MkdirAll(s.PathProvider.GetConfigFolderPath(), os.FileMode(configDirPerms)); errMkdir != nil {
+	if errMkdir := os.MkdirAll(s.Paths.Config, os.FileMode(configDirPerms)); errMkdir != nil {
 		return fmt.Errorf("failed to write settings: %v", errMkdir)
 	}
 

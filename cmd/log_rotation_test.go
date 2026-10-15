@@ -8,26 +8,15 @@ import (
 	"github.com/strobotti/linkquisition"
 )
 
-// testPathProvider implements linkquisition.PathProvider for testing.
-type testPathProvider struct {
-	configFolder string
-	logFolder    string
-	pluginFolder string
-}
-
-func (p *testPathProvider) GetConfigFolderPath() string { return p.configFolder }
-func (p *testPathProvider) GetLogFolderPath() string    { return p.logFolder }
-func (p *testPathProvider) GetPluginFolderPath() string { return p.pluginFolder }
-
 func newTestSettingsService(t *testing.T) *linkquisition.FileSettingsService {
 	t.Helper()
 	dir := t.TempDir()
 
 	return &linkquisition.FileSettingsService{
-		PathProvider: &testPathProvider{
-			configFolder: dir,
-			logFolder:    dir,
-			pluginFolder: dir,
+		Paths: linkquisition.Paths{
+			Config:  dir,
+			Log:     dir,
+			Plugins: dir,
 		},
 	}
 }

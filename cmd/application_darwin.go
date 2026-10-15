@@ -15,7 +15,7 @@ func newPlatformServices() (linkquisition.BrowserService, linkquisition.Settings
 
 	settingsService := &linkquisition.FileSettingsService{
 		BrowserService: browserService,
-		PathProvider:   &darwin.PathProvider{},
+		Paths:          darwin.NewPaths(),
 	}
 
 	return browserService, settingsService

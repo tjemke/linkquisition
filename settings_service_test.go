@@ -12,13 +12,10 @@ import (
 	. "github.com/strobotti/linkquisition"
 )
 
-type testPathProvider struct {
-	dir string
+// testPaths puts all of the service's folders in dir.
+func testPaths(dir string) Paths {
+	return Paths{Config: dir, Log: dir, Plugins: dir}
 }
-
-func (p *testPathProvider) GetConfigFolderPath() string { return p.dir }
-func (p *testPathProvider) GetLogFolderPath() string    { return p.dir }
-func (p *testPathProvider) GetPluginFolderPath() string { return p.dir }
 
 type mockBrowserService struct {
 	browsers []Browser
@@ -39,7 +36,7 @@ func newTestService(t *testing.T, browsers []Browser) *FileSettingsService {
 	t.Helper()
 	return &FileSettingsService{
 		BrowserService: &mockBrowserService{browsers: browsers},
-		PathProvider:   &testPathProvider{dir: t.TempDir()},
+		Paths:          testPaths(t.TempDir()),
 	}
 }
 
@@ -215,7 +212,7 @@ func TestFileSettingsService_GetSettings_ReturnsDefaultForCorruptFile(t *testing
 func TestFileSettingsService_ScanBrowsers_ReturnsErrorWhenGetAvailableBrowsersFails(t *testing.T) {
 	svc := &FileSettingsService{
 		BrowserService: &mockBrowserService{browsers: nil, err: fmt.Errorf("no browsers found")},
-		PathProvider:   &testPathProvider{dir: t.TempDir()},
+		Paths:          testPaths(t.TempDir()),
 	}
 
 	err := svc.ScanBrowsers()
@@ -238,7 +235,7 @@ func TestFileSettingsService_ScanBrowsers_ReturnsErrorWhenWriteFails(t *testing.
 		BrowserService: &mockBrowserService{
 			browsers: []Browser{{Name: "Firefox", Command: "firefox"}},
 		},
-		PathProvider: &testPathProvider{dir: filepath.Join(readOnlyDir, "subdir")},
+		Paths: testPaths(filepath.Join(readOnlyDir, "subdir")),
 	}
 
 	err := svc.ScanBrowsers()
@@ -298,10 +295,26 @@ func TestFileSettingsService_WriteSettings_ReturnsErrorForUnwritablePath(t *test
 
 	svc := &FileSettingsService{
 		BrowserService: &mockBrowserService{},
-		PathProvider:   &testPathProvider{dir: filepath.Join(readOnlyDir, "nested", "deep")},
+		Paths:          testPaths(filepath.Join(readOnlyDir, "nested", "deep")),
 	}
 
 	err := svc.WriteSettings(GetDefaultSettings())
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to write settings")
+}
+
+func TestFileSettingsService_PathGettersUsePaths(t *testing.T) {
+	paths := Paths{
+		Config:  filepath.Join("cfg", "linkquisition"),
+		Log:     filepath.Join("state", "linkquisition"),
+		Plugins: filepath.Join("lib", "plugins"),
+	}
+	svc := &FileSettingsService{Paths: paths}
+
+	assert.Equal(t, paths, svc.GetPaths())
+	assert.Equal(t, paths.Config, svc.GetConfigFolderPath())
+	assert.Equal(t, filepath.Join(paths.Config, "config.json"), svc.GetConfigFilePath())
+	assert.Equal(t, paths.Log, svc.GetLogFolderPath())
+	assert.Equal(t, filepath.Join(paths.Log, "linkquisition.log"), svc.GetLogFilePath())
+	assert.Equal(t, paths.Plugins, svc.GetPluginFolderPath())
 }
