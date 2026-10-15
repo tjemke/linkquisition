@@ -146,7 +146,7 @@ Linkquisition as the handler for http/https URLs.
 # CONFIGURATION
 
 The configuration file is located at
-_~/.config/linkquisition/config.json_ (Linux) or
+_$XDG_CONFIG_HOME/linkquisition/config.json_ (Linux, default _~/.config_) or
 _~/Library/Application Support/linkquisition/config.json_ (macOS).
 See *linkquisition*(5) for the file format.
 
@@ -220,6 +220,20 @@ Favicons are cached locally for 7 days.
 The About tab in the configuration screen has a "Check for updates" button that
 queries the GitHub releases API. If a newer version is available, a link to the
 release page is shown. No automatic update checking is performed.
+
+# ENVIRONMENT
+
+On Linux, *linkquisition* follows the XDG Base Directory Specification.
+Variables that are unset, empty or not absolute paths fall back to the defaults
+shown below.
+
+*XDG_CONFIG_HOME*
+	The configuration file is _$XDG_CONFIG_HOME/linkquisition/config.json_.
+	Default: _~/.config_.
+
+*XDG_STATE_HOME*
+	The log file is _$XDG_STATE_HOME/linkquisition/linkquisition.log_.
+	Default: _~/.local/state_.
 
 # SEE ALSO
 

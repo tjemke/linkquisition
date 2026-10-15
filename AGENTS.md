@@ -267,10 +267,18 @@ Useful flags for debugging:
 
 | What                  | Linux                             | macOS                                                 | Windows                              |
 |-----------------------|-----------------------------------|-------------------------------------------------------|--------------------------------------|
-| Config                | `~/.config/linkquisition/`        | `~/Library/Application Support/linkquisition/`        | `%APPDATA%\linkquisition\`           |
-| Logs                  | `~/.local/state/linkquisition/`   | `~/Library/Logs/linkquisition/`                       | `%LOCALAPPDATA%\linkquisition\logs\` |
+| Config                | `$XDG_CONFIG_HOME/linkquisition/` | `~/Library/Application Support/linkquisition/`        | `%APPDATA%\linkquisition\`           |
+| Logs                  | `$XDG_STATE_HOME/linkquisition/`  | `~/Library/Logs/linkquisition/`                       | `%LOCALAPPDATA%\linkquisition\logs\` |
 | Plugins (system)      | `/usr/lib/linkquisition/plugins/` | `Linkquisition.app/Contents/Resources/plugins/`       | N/A (plugins not supported)          |
 | Plugin cache (defang) | `~/.config/linkquisition/defang/` | `~/Library/Application Support/linkquisition/defang/` | N/A (plugins not supported)          |
+
+On Linux, never read `XDG_*` variables or hardcode FHS paths such as `/usr/share`: take the
+directories from `freedesktop.BaseDirs` (`NewBaseDirs()` snapshots them via
+[adrg/xdg](https://github.com/adrg/xdg), which applies the spec's defaults and ignores
+empty or relative values). The defaults are `~/.config`, `~/.local/state`, `~/.cache`,
+`~/.local/share` and `/usr/local/share:/usr/share`; on NixOS, Flatpak and per-user
+installs the data dirs are elsewhere. In tests, build a `BaseDirs` literal pointing at
+`t.TempDir()` rather than setting environment variables.
 
 ## Localization
 

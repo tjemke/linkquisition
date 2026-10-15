@@ -4,6 +4,7 @@ go 1.26.6
 
 require (
 	fyne.io/fyne/v2 v2.8.1
+	github.com/adrg/xdg v0.5.3
 	github.com/jackmordaunt/icns/v3 v3.0.1
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
 	github.com/likexian/whois v1.15.7

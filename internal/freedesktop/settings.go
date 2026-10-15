@@ -3,40 +3,20 @@
 package freedesktop
 
 import (
-	"os"
 	"path/filepath"
 
 	"github.com/strobotti/linkquisition"
 )
 
-// NewPaths resolves the folders linkquisition uses on Linux.
-func NewPaths() linkquisition.Paths {
+// appDirName is the name of linkquisition's folder inside each XDG base directory.
+const appDirName = "linkquisition"
+
+// NewPaths resolves the folders linkquisition uses on Linux from the XDG base
+// directories: config in $XDG_CONFIG_HOME and logs in $XDG_STATE_HOME.
+func NewPaths(dirs *BaseDirs) linkquisition.Paths {
 	return linkquisition.Paths{
-		Config:  configFolderPath(),
-		Log:     logFolderPath(),
+		Config:  filepath.Join(dirs.ConfigHome, appDirName),
+		Log:     filepath.Join(dirs.StateHome, appDirName),
 		Plugins: "/usr/lib/linkquisition/plugins",
 	}
-}
-
-func configFolderPath() string {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return ".config"
-	}
-
-	return filepath.Join(configDir, "linkquisition")
-}
-
-func logFolderPath() string {
-	stateDir, isset := os.LookupEnv("XDG_STATE_HOME")
-	if isset {
-		return filepath.Join(stateDir, "linkquisition")
-	}
-
-	homeDir, err := os.UserHomeDir()
-	if err == nil {
-		return filepath.Join(homeDir, ".local", "state", "linkquisition")
-	}
-
-	return filepath.Join(os.TempDir(), "linkquisition")
 }

@@ -132,7 +132,8 @@ screen.
 To set Linkquisition as the default browser, you can click the "Set as default" button and after this any links opened
 (outside browsers) will either show you the screen to choose a browser, or open one automatically if configured so.
 
-The configuration file is located at `~/.config/linkquisition/config.json` and clicking the "Scan browsers" button will
+The configuration file is located at `~/.config/linkquisition/config.json` (or `$XDG_CONFIG_HOME/linkquisition/config.json`
+if `XDG_CONFIG_HOME` is set) and clicking the "Scan browsers" button will
 create one if it does not exist, or update it with the currently installed browsers. Re-scanning later will not remove
 any manually added browsers or rules to existing browsers.
 

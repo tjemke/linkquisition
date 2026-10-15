@@ -6,7 +6,7 @@ linkquisition - configuration file format
 
 # SYNOPSIS
 
-_~/.config/linkquisition/config.json_ (Linux)++
+_$XDG_CONFIG_HOME/linkquisition/config.json_ (Linux, default _~/.config_)++
 _~/Library/Application Support/linkquisition/config.json_ (macOS)++
 _%APPDATA%\\linkquisition\\config.json_ (Windows)
 

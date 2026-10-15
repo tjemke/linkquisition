@@ -63,6 +63,11 @@ github.com/BurntSushi/toml/internal
 # github.com/FyshOS/fancyfs v0.0.1
 ## explicit; go 1.19
 github.com/FyshOS/fancyfs
+# github.com/adrg/xdg v0.5.3
+## explicit; go 1.19
+github.com/adrg/xdg
+github.com/adrg/xdg/internal/pathutil
+github.com/adrg/xdg/internal/userdirs
 # github.com/alessio/shellescape v1.4.2
 ## explicit; go 1.14
 # github.com/anthonynsimon/bild v0.14.0
