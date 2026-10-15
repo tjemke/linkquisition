@@ -13,6 +13,7 @@ import (
 )
 
 type XdgService struct {
+	BaseDirs *BaseDirs
 }
 
 func (x *XdgService) GetDesktopEntryPathForFilename(name string) (string, error) {
@@ -60,36 +61,21 @@ func (x *XdgService) GetDesktopEntryPathForBinary(command string) (string, error
 	return "", fmt.Errorf("no .desktop entry found for %s", command)
 }
 
+// GetApplicationPaths returns the existing "applications" folders under the XDG
+// data directories, most important first: $XDG_DATA_HOME, then each entry of
+// $XDG_DATA_DIRS. This is where desktop entries are installed, e.g. under
+// /run/current-system/sw/share and the user's profiles on NixOS, or
+// /var/lib/flatpak/exports/share for Flatpak apps.
 func (x *XdgService) GetApplicationPaths() []string {
 	var paths []string
 
-	// Include user-local applications directory ($XDG_DATA_HOME/applications/)
-	dataHome, isset := os.LookupEnv("XDG_DATA_HOME")
-	if !isset {
-		if home, err := os.UserHomeDir(); err == nil {
-			dataHome = filepath.Join(home, ".local", "share")
-		}
-	}
-	if dataHome != "" {
-		userAppsDir := filepath.Join(dataHome, "applications")
-		if _, err := os.Stat(userAppsDir); err == nil {
-			paths = append(paths, userAppsDir)
+	for _, dir := range x.BaseDirs.DataSearchPath() {
+		appsDir := filepath.Join(dir, "applications")
+		if _, err := os.Stat(appsDir); err == nil {
+			paths = append(paths, appsDir)
 		}
 	}
 
-	// Include system-wide application directories ($XDG_DATA_DIRS/applications/)
-	datadirs, isset := os.LookupEnv("XDG_DATA_DIRS")
-	if !isset {
-		datadirs = "/usr/local/share/:/usr/share/"
-	}
-
-	for _, datadir := range strings.Split(datadirs, ":") {
-		desktopEntryPath := filepath.Join(datadir, "applications")
-
-		if _, err := os.Stat(desktopEntryPath); err == nil {
-			paths = append(paths, desktopEntryPath)
-		}
-	}
 	return paths
 }
 

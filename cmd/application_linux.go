@@ -12,7 +12,7 @@ import (
 
 func newPlatformServices() (linkquisition.BrowserService, linkquisition.SettingsService) {
 	baseDirs := freedesktop.NewBaseDirs()
-	xdgService := &freedesktop.XdgService{}
+	xdgService := &freedesktop.XdgService{BaseDirs: baseDirs}
 	browserService := &freedesktop.BrowserService{
 		XdgService:          xdgService,
 		DesktopEntryService: &freedesktop.DesktopEntryService{},

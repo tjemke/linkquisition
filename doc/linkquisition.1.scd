@@ -235,6 +235,11 @@ shown below.
 	The log file is _$XDG_STATE_HOME/linkquisition/linkquisition.log_.
 	Default: _~/.local/state_.
 
+*XDG_DATA_HOME*, *XDG_DATA_DIRS*
+	Browsers are discovered from the desktop entries in the _applications_
+	folder of each data directory, _$XDG_DATA_HOME_ first. Defaults:
+	_~/.local/share_ and _/usr/local/share:/usr/share_.
+
 # SEE ALSO
 
 *linkquisition*(5), *xdg-settings*(1)

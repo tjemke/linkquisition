@@ -55,3 +55,25 @@ func NewBaseDirs() *BaseDirs {
 		CacheHome:  xdg.CacheHome,
 	}
 }
+
+// DataSearchPath returns the directories to search for data files, most
+// important first: DataHome followed by DataDirs.
+func (d *BaseDirs) DataSearchPath() []string {
+	return uniquePaths(append([]string{d.DataHome}, d.DataDirs...))
+}
+
+// uniquePaths returns paths without empty and repeated entries, keeping the
+// first occurrence of each.
+func uniquePaths(paths []string) []string {
+	seen := make(map[string]bool, len(paths))
+	unique := make([]string, 0, len(paths))
+	for _, path := range paths {
+		if path == "" || seen[path] {
+			continue
+		}
+		seen[path] = true
+		unique = append(unique, path)
+	}
+
+	return unique
+}

@@ -23,6 +23,12 @@ func (m *mockBrowserIconLoader) ResolveIconName(_ string) string {
 	return ""
 }
 
+// newTestXdgService returns an XdgService searching the given data home and
+// data dirs instead of the real XDG base directories.
+func newTestXdgService(dataHome string, dataDirs ...string) *XdgService {
+	return &XdgService{BaseDirs: &BaseDirs{DataHome: dataHome, DataDirs: dataDirs}}
+}
+
 func TestDesktopEntryHasCategory_MatchesWebBrowser(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "firefox.desktop")
@@ -150,26 +156,30 @@ func TestGetApplicationPaths_UsesXDGDataDirs(t *testing.T) {
 	appsDir := filepath.Join(dir, "share", "applications")
 	require.NoError(t, os.MkdirAll(appsDir, 0755))
 
-	// Set XDG_DATA_DIRS to our test directory
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
-	xdg := &XdgService{}
+	xdg := newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share"))
 	paths := xdg.GetApplicationPaths()
 
 	assert.Contains(t, paths, appsDir)
 }
 
-func TestGetApplicationPaths_DefaultsWhenUnset(t *testing.T) {
-	// Unset XDG_DATA_DIRS — the function should use the defaults
-	t.Setenv("XDG_DATA_DIRS", "")
-	os.Unsetenv("XDG_DATA_DIRS")
+func TestGetApplicationPaths_SkipsMissingAndDuplicateDirs(t *testing.T) {
+	dir := t.TempDir()
+	profile := filepath.Join(dir, "profile", "share")
+	system := filepath.Join(dir, "system", "share")
+	require.NoError(t, os.MkdirAll(filepath.Join(profile, "applications"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(system, "applications"), 0755))
 
-	xdg := &XdgService{}
+	// NixOS sessions often list the same profile more than once.
+	xdg := newTestXdgService(
+		filepath.Join(dir, "missing"),
+		profile, filepath.Join(dir, "no-such-profile", "share"), system, profile,
+	)
 	paths := xdg.GetApplicationPaths()
 
-	// On a typical system at least one of the default paths exists,
-	// but in CI it might not. Just verify it doesn't panic.
-	_ = paths
+	assert.Equal(t, []string{
+		filepath.Join(profile, "applications"),
+		filepath.Join(system, "applications"),
+	}, paths)
 }
 
 func TestGetDesktopEntryPathForFilename_Found(t *testing.T) {
@@ -181,10 +191,7 @@ func TestGetDesktopEntryPathForFilename_Found(t *testing.T) {
 	desktopFile := filepath.Join(appsDir, "firefox.desktop")
 	require.NoError(t, os.WriteFile(desktopFile, []byte("[Desktop Entry]\nName=Firefox\n"), 0600))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
-	xdg := &XdgService{}
+	xdg := newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share"))
 	result, err := xdg.GetDesktopEntryPathForFilename("firefox.desktop")
 
 	assert.NoError(t, err)
@@ -196,10 +203,7 @@ func TestGetDesktopEntryPathForFilename_NotFound(t *testing.T) {
 	appsDir := filepath.Join(dir, "share", "applications")
 	require.NoError(t, os.MkdirAll(appsDir, 0755))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
-	xdg := &XdgService{}
+	xdg := newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share"))
 	_, err := xdg.GetDesktopEntryPathForFilename("nonexistent.desktop")
 
 	assert.Error(t, err)
@@ -220,10 +224,7 @@ Categories=Network;WebBrowser;
 	desktopFile := filepath.Join(appsDir, "firefox.desktop")
 	require.NoError(t, os.WriteFile(desktopFile, []byte(content), 0600))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
-	xdg := &XdgService{}
+	xdg := newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share"))
 	result, err := xdg.GetDesktopEntryPathForBinary("/usr/bin/firefox")
 
 	assert.NoError(t, err)
@@ -243,10 +244,7 @@ Type=Application
 	desktopFile := filepath.Join(appsDir, "chrome.desktop")
 	require.NoError(t, os.WriteFile(desktopFile, []byte(content), 0600))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
-	xdg := &XdgService{}
+	xdg := newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share"))
 	result, err := xdg.GetDesktopEntryPathForBinary("/usr/bin/google-chrome-stable")
 
 	assert.NoError(t, err)
@@ -265,10 +263,7 @@ Type=Application
 `
 	require.NoError(t, os.WriteFile(filepath.Join(appsDir, "firefox.desktop"), []byte(content), 0600))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
-	xdg := &XdgService{}
+	xdg := newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share"))
 	_, err := xdg.GetDesktopEntryPathForBinary("/usr/bin/chromium")
 
 	assert.Error(t, err)
@@ -299,11 +294,8 @@ Categories=Development;TextEditor;
 `
 	require.NoError(t, os.WriteFile(filepath.Join(appsDir, "editor.desktop"), []byte(editorContent), 0600))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
 	svc := &BrowserService{
-		XdgService:          &XdgService{},
+		XdgService:          newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share")),
 		DesktopEntryService: &DesktopEntryService{},
 		BrowserIconLoader:   &mockBrowserIconLoader{},
 	}
@@ -329,11 +321,8 @@ Categories=Network;WebBrowser;
 `
 	require.NoError(t, os.WriteFile(filepath.Join(appsDir, "linkquisition.desktop"), []byte(content), 0600))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
 	svc := &BrowserService{
-		XdgService:          &XdgService{},
+		XdgService:          newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share")),
 		DesktopEntryService: &DesktopEntryService{},
 		BrowserIconLoader:   &mockBrowserIconLoader{},
 	}
@@ -346,11 +335,8 @@ Categories=Network;WebBrowser;
 
 func TestGetAvailableBrowsers_EmptyPaths(t *testing.T) {
 	// Point to a non-existent directory
-	t.Setenv("XDG_DATA_HOME", "/nonexistent/local")
-	t.Setenv("XDG_DATA_DIRS", "/nonexistent/path")
-
 	svc := &BrowserService{
-		XdgService:          &XdgService{},
+		XdgService:          newTestXdgService("/nonexistent/local", "/nonexistent/path"),
 		DesktopEntryService: &DesktopEntryService{},
 		BrowserIconLoader:   &mockBrowserIconLoader{},
 	}
@@ -431,10 +417,7 @@ func TestGetApplicationPaths_IncludesUserLocal(t *testing.T) {
 	require.NoError(t, os.MkdirAll(localAppsDir, 0755))
 	require.NoError(t, os.MkdirAll(systemAppsDir, 0755))
 
-	t.Setenv("XDG_DATA_HOME", filepath.Join(dir, "local"))
-	t.Setenv("XDG_DATA_DIRS", filepath.Join(dir, "share"))
-
-	xdg := &XdgService{}
+	xdg := newTestXdgService(filepath.Join(dir, "local"), filepath.Join(dir, "share"))
 	paths := xdg.GetApplicationPaths()
 
 	assert.Contains(t, paths, localAppsDir)

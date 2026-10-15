@@ -66,3 +66,13 @@ func TestNewBaseDirs_IgnoresRelativePaths(t *testing.T) {
 	assert.Equal(t, filepath.Join(home, ".local", "state"), dirs.StateHome)
 	assert.Equal(t, []string{share}, dirs.DataDirs, "relative, empty and duplicate entries are dropped")
 }
+
+func TestBaseDirs_DataSearchPath(t *testing.T) {
+	dataHome := filepath.Join(t.TempDir(), "data")
+	dirs := &BaseDirs{
+		DataHome: dataHome,
+		DataDirs: []string{"/run/current-system/sw/share", dataHome, "/usr/share", "/run/current-system/sw/share"},
+	}
+
+	assert.Equal(t, []string{dataHome, "/run/current-system/sw/share", "/usr/share"}, dirs.DataSearchPath())
+}
