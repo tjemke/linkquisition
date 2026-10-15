@@ -23,7 +23,7 @@ func TestTerminus_Setup_Defaults(t *testing.T) {
 		},
 	}
 	logger := slog.New(slog.NewTextHandler(mockIoWriter, nil))
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 
 	testedPlugin := Plugin
 	err := testedPlugin.Setup(provider, map[string]interface{}{})
@@ -40,7 +40,7 @@ func TestTerminus_Setup_CustomSettings(t *testing.T) {
 		},
 	}
 	logger := slog.New(slog.NewTextHandler(mockIoWriter, nil))
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 
 	testedPlugin := Plugin
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -60,7 +60,7 @@ func TestTerminus_Setup_MalformedTimeout(t *testing.T) {
 		},
 	}
 	logger := slog.New(slog.NewTextHandler(mockIoWriter, nil))
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 
 	testedPlugin := Plugin
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -77,7 +77,7 @@ func TestTerminus_Setup_InvalidConfigType(t *testing.T) {
 		},
 	}
 	logger := slog.New(slog.NewTextHandler(mockIoWriter, nil))
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 
 	testedPlugin := Plugin
 	// Pass a config with wrong types — mapstructure.Decode will produce an error
@@ -191,7 +191,7 @@ func TestTerminus_ProcessURL(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			testedPlugin := Plugin
 
-			provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+			provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 			err := testedPlugin.Setup(provider, map[string]interface{}{})
 			require.NoError(t, err)
 

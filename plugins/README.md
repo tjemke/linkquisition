@@ -279,7 +279,9 @@ The plugin is a shared object file (`.so`) that is loaded by the main applicatio
   and a list of `PluginSettingDescriptor` values describing the configurable settings). This is used by the CLI
   and will be used by the GUI in a future version.
 - `Setup(serviceProvider, config) error` — called once when the plugin is loaded. The `serviceProvider` gives access
-  to the logger, settings, and the config folder path. Returns an error if the plugin cannot initialize.
+  to the logger, settings, and the folders the plugin may keep files in (`GetPaths()`): `Cache` for data that can be
+  downloaded or computed again (e.g. `~/.cache/linkquisition` on Linux) and `Config` for anything else. Use a
+  subfolder named after the plugin. Returns an error if the plugin cannot initialize.
 - `ProcessURL(ctx context.Context, url string) PluginResult` — called for each URL before browser matching.
   Returns a `PluginResult` with the (possibly modified) URL and an action:
     - `ActionContinue` — pass the URL to the next plugin or browser matching

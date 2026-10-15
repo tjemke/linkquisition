@@ -27,6 +27,11 @@ func newTestLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(mockIoWriter, nil))
 }
 
+// testPaths returns linkquisition.Paths with the config and cache folders both in dir.
+func testPaths(dir string) linkquisition.Paths {
+	return linkquisition.Paths{Config: dir, Cache: dir}
+}
+
 // newPlugin creates a fresh plugin instance for testing (avoids sharing mutex state between tests)
 func newPlugin() linkquisition.Plugin {
 	return NewForTesting()
@@ -35,7 +40,7 @@ func newPlugin() linkquisition.Plugin {
 func TestDefang_Setup_Defaults(t *testing.T) {
 	logger := newTestLogger()
 	tmpDir := t.TempDir()
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -58,7 +63,7 @@ func TestDefang_Setup_Defaults(t *testing.T) {
 func TestDefang_Setup_InvalidDuration(t *testing.T) {
 	logger := newTestLogger()
 	tmpDir := t.TempDir()
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -72,7 +77,7 @@ func TestDefang_Setup_InvalidDuration(t *testing.T) {
 func TestDefang_Setup_InvalidAction(t *testing.T) {
 	logger := newTestLogger()
 	tmpDir := t.TempDir()
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -100,7 +105,7 @@ func TestDefang_ProcessURL_WithCachedBlocklist(t *testing.T) {
 `
 	require.NoError(t, os.WriteFile(filepath.Join(cacheDir, "source_0.txt"), []byte(hostsContent), 0600))
 
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	for _, tt := range []struct {
 		name           string
@@ -232,7 +237,7 @@ func TestDefang_BackgroundFetch(t *testing.T) {
 
 	logger := newTestLogger()
 	tmpDir := t.TempDir()
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -269,7 +274,7 @@ func TestDefang_BackgroundFetch_ServerError(t *testing.T) {
 
 	logger := newTestLogger()
 	tmpDir := t.TempDir()
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -298,7 +303,7 @@ func TestDefang_Shutdown_NoUpdate(t *testing.T) {
 	require.NoError(t, os.MkdirAll(cacheDir, 0700))
 	require.NoError(t, os.WriteFile(filepath.Join(cacheDir, "source_0.txt"), []byte(""), 0600))
 
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -325,7 +330,7 @@ func TestDefang_CaseInsensitive(t *testing.T) {
 `
 	require.NoError(t, os.WriteFile(filepath.Join(cacheDir, "source_0.txt"), []byte(hostsContent), 0600))
 
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -349,7 +354,7 @@ func TestDefang_CaseInsensitive(t *testing.T) {
 func TestDefang_CustomSources(t *testing.T) {
 	logger := newTestLogger()
 	tmpDir := t.TempDir()
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, tmpDir)
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, testPaths(tmpDir))
 
 	testedPlugin := newPlugin()
 	err := testedPlugin.Setup(provider, map[string]interface{}{

@@ -105,13 +105,14 @@ When making changes, ensure ALL relevant documentation is updated:
 - `Setup` returns an `error` — invalid config should fail loudly
 - `ProcessURL` receives a `context.Context` and returns `PluginResult` (URL, Action, Message, ContinueChain)
 - `Shutdown` receives a `context.Context` — respect the deadline
-- Use `NewPluginServiceProvider` to access logger, settings, and config folder path
+- Use `NewPluginServiceProvider` to access logger, settings, and folders (`GetPaths()`: regenerable data goes in
+  `Cache`, anything else in `Config`, each in a subfolder named after the plugin)
 - Plugin `.so` files MUST be built from the same source tree as the main binary (interface mismatch = crash)
 
 ### Testing plugins
 
 - Use `NewForTesting()` if the plugin struct contains a `sync.Mutex` (avoid copying the global `Plugin` var)
-- Pass `""` for `configFolderPath` in tests unless testing file I/O
+- Pass `linkquisition.Paths{}` to `NewPluginServiceProvider` in tests unless testing file I/O
 - Use `t.TempDir()` for any file system operations in tests
 - Use `httptest.NewServer` for testing HTTP-dependent plugins
 

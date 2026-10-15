@@ -52,7 +52,7 @@ func NewApplication() *Application {
 
 	logger := setupLogger(settingsService)
 	pluginServiceProvider := linkquisition.NewPluginServiceProvider(
-		logger, settingsService.GetSettings(), settingsService.GetConfigFolderPath(),
+		logger, settingsService.GetSettings(), settingsService.GetPaths(),
 	)
 
 	var plugins []linkquisition.Plugin

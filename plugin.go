@@ -131,19 +131,28 @@ type Plugin interface {
 	Shutdown(ctx context.Context)
 }
 
-// PluginServiceProvider is an interface that provides the logger and settings to the plugin.
+// PluginServiceProvider is an interface that provides the logger, settings and folders to the plugin.
 // This is passed to the plugin as a dependency during Setup.
 type PluginServiceProvider interface {
 	GetLogger() *slog.Logger
 	GetSettings() *Settings
+
+	// GetPaths returns the folders linkquisition keeps its files in. Plugins
+	// should keep their own files in a subfolder named after the plugin: data
+	// that can be downloaded or computed again in Cache, anything else in Config.
+	GetPaths() Paths
+
+	// GetConfigFolderPath returns the config folder.
+	//
+	// Deprecated: use GetPaths().Config.
 	GetConfigFolderPath() string
 }
 
 // pluginServiceProvider is a struct that implements the PluginServiceProvider interface
 type pluginServiceProvider struct {
-	logger           *slog.Logger
-	Settings         *Settings
-	configFolderPath string
+	logger   *slog.Logger
+	Settings *Settings
+	paths    Paths
 }
 
 func (p *pluginServiceProvider) GetLogger() *slog.Logger {
@@ -154,10 +163,14 @@ func (p *pluginServiceProvider) GetSettings() *Settings {
 	return p.Settings
 }
 
-func (p *pluginServiceProvider) GetConfigFolderPath() string {
-	return p.configFolderPath
+func (p *pluginServiceProvider) GetPaths() Paths {
+	return p.paths
 }
 
-func NewPluginServiceProvider(logger *slog.Logger, settings *Settings, configFolderPath string) PluginServiceProvider {
-	return &pluginServiceProvider{logger: logger, Settings: settings, configFolderPath: configFolderPath}
+func (p *pluginServiceProvider) GetConfigFolderPath() string {
+	return p.paths.Config
+}
+
+func NewPluginServiceProvider(logger *slog.Logger, settings *Settings, paths Paths) PluginServiceProvider {
+	return &pluginServiceProvider{logger: logger, Settings: settings, paths: paths}
 }

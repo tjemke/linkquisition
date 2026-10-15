@@ -20,7 +20,7 @@ func TestSanitize_Setup_Defaults(t *testing.T) {
 		},
 	}
 	logger := slog.New(slog.NewTextHandler(mockIoWriter, nil))
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 
 	testedPlugin := Plugin
 	err := testedPlugin.Setup(provider, map[string]interface{}{})
@@ -39,7 +39,7 @@ func TestSanitize_Setup_InvalidRegex(t *testing.T) {
 		},
 	}
 	logger := slog.New(slog.NewTextHandler(mockIoWriter, nil))
-	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+	provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 
 	testedPlugin := Plugin
 	err := testedPlugin.Setup(provider, map[string]interface{}{
@@ -191,7 +191,7 @@ func TestSanitize_ProcessURL(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			testedPlugin := Plugin
-			provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, "")
+			provider := linkquisition.NewPluginServiceProvider(logger, &linkquisition.Settings{}, linkquisition.Paths{})
 			err := testedPlugin.Setup(provider, tt.config)
 			require.NoError(t, err)
 

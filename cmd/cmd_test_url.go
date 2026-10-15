@@ -42,7 +42,7 @@ func runTestURL(_ *cobra.Command, args []string) error {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 	pluginServiceProvider := linkquisition.NewPluginServiceProvider(
-		logger, settings, settingsService.GetConfigFolderPath(),
+		logger, settings, settingsService.GetPaths(),
 	)
 
 	plugins := setupPlugins(settingsService, pluginServiceProvider, logger, parsePluginOpts(pluginOpts))

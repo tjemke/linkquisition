@@ -15,7 +15,7 @@ func newTestServiceProvider() linkquisition.PluginServiceProvider {
 	return linkquisition.NewPluginServiceProvider(
 		slog.New(slog.NewTextHandler(os.Stdout, nil)),
 		&linkquisition.Settings{},
-		"",
+		linkquisition.Paths{},
 	)
 }
 
